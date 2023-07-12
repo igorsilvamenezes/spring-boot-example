@@ -4,7 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @SpringBootApplication
 @RestController
@@ -23,7 +26,10 @@ public class Main {
 
     @GetMapping
     public List<Customer> getCustomers(){
-        return customerRepository.findAll();
+        return customerRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparingInt(Customer::getId))
+                .collect(Collectors.toList());
     }
 
     record NewCustomerRequest(
@@ -46,5 +52,18 @@ public class Main {
     @DeleteMapping("{customerId}")
     public void deleteCustomer(@PathVariable("customerId") Integer id) {
         customerRepository.deleteById(id);
+    }
+
+    @PutMapping("{customerId}")
+    public void updateCustomer(@PathVariable("customerId") Integer id,
+                               @RequestBody NewCustomerRequest request) {
+        Customer customer = customerRepository.getReferenceById(id);
+
+        if(Objects.nonNull(customer)) {
+            customer.setName(request.name);
+            customer.setEmail(request.email);
+            customer.setAge(request.age);
+            customerRepository.save(customer);
+        }
     }
 }
