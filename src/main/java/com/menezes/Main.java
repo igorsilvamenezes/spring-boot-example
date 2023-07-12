@@ -2,9 +2,7 @@ package com.menezes;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -28,24 +26,20 @@ public class Main {
         return customerRepository.findAll();
     }
 
-    @GetMapping("/greet")
-    public GreetResponse greet() {
-        GreetResponse response = new GreetResponse(
-                "Hello",
-                List.of("Java", "GoLang", "JavaScript"),
-                new Person("Alex", 28, 30_000)
-        );
-        return response;
-    }
-
-    record Person(String name, int age, double savings) {
+    record NewCustomerRequest(
+            String name,
+            String email,
+            Integer age
+    ) {
 
     }
 
-    record GreetResponse(
-            String greet,
-            List<String> favProgrammingLanguages,
-            Person person) {
-
+    @PostMapping
+    public void addCustomer(@RequestBody NewCustomerRequest request) {
+        Customer customer = new Customer();
+        customer.setName(request.name);
+        customer.setEmail(request.email);
+        customer.setAge(request.age);
+        customerRepository.save(customer);
     }
 }
